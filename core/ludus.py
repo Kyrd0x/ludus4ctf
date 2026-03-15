@@ -81,6 +81,17 @@ class LudusAPI:
             self.logger.error(f"Error adding users to Ludus group: {e}")
             sys.exit(1)
 
+    def get_group_users(self, teamname):
+        try:
+            response = self.session.get(f'{self.ludus_url}/groups/{teamname}/users')
+            response.raise_for_status()
+            users = response.json()
+            self.logger.debug(f"Successfully retrieved users for group '{teamname}'.")
+            return users
+        except requests.RequestException as e:
+            self.logger.error(f"Error retrieving users for Ludus group: {e}")
+            sys.exit(1)
+
     # -------------USERS LOGIC--------------------------------------------
 
     def create_user(self, username, teamname):
@@ -120,6 +131,17 @@ class LudusAPI:
             return users
         except requests.RequestException as e:
             self.logger.error(f"Error retrieving users from Ludus: {e}")
+            sys.exit(1)
+
+    # Not working for some reason, returns empty list even if the user is in a group
+    def get_user_groups(self, userID):
+        try:
+            response = self.session.get(f'{self.ludus_url}/user/memberships', params={'userID': userID})
+            response.raise_for_status()
+            groups = response.json()
+            self.logger.debug(f"Successfully retrieved '{groups}' for userID '{userID}'.")
+        except requests.RequestException as e:
+            self.logger.error(f"Error retrieving groups for userID '{userID}': {e}")
             sys.exit(1)
 
     def generate_wireguard_config(self, userID, public_ip=None):

@@ -30,12 +30,11 @@ def get_teams_from_csv(file_path):
     return teams
 
 def list_users(ludus_api, logger):
-    users = ludus_api.get_users()
     groups = ludus_api.get_groups(description_filter="ludus4ctf")
     for group in groups:
         print(f"{group.get('name')} (description: {group.get('description')})")
-        for user in users:
-            # Check todo
+        users_in_group = ludus_api.get_group_users(group.get('name'))
+        for user in users_in_group:
             print(f" - {user.get('name')} (userID: {user.get('userID')})")
 
 def run(options, logger):
