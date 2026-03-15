@@ -1,18 +1,17 @@
-# Ludus 4 CTF
+# Ludus4CTF
 
 ## What is it
 
 Take a user file, formatted to : 
 
 ```csv
-TeamName;Username
+Teamame;Username
 Team1;Toto
 Team1;Tata
 Team2;Tutu
-...
 ```
 
-Create the associated ludus users and config files :
+Create the associated ludus groups and users :
 - 1 Range per team
 - 1 user per user
 
