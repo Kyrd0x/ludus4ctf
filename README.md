@@ -19,6 +19,8 @@ Gather the user wireguard config, option to edit the endpoint IP to a custom one
 
 ## Setup
 
+Install ludus client following the official [doc](https://docs.ludus.cloud/docs/quick-start/using-cli-locally#setting-up-the-ludus-client-locally)
+
 ```sh
 git clone https://github.com/Kyrd0x/ludus4ctf.git
 cd ludus4ctf/
@@ -33,13 +35,19 @@ eval "$(register-python-argcomplete ludus4ctf)"
 # Rename env file template and edit it
 mv .env.template .env
 
+# Edit your ludus host url in the config, default might be straight good
+mv config.yml.template config.yml
+
 ./ludus4ctf.py --help
 ```
 
 ## How to use
 
 ```sh
-#todo
+ludus4ctf.py add --csv teams.csv
+ludus4ctf.py delete
+ludus4ctf.py list
+ludus4ctf.py generate
 ```
 
 ## References

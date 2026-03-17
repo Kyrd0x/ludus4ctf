@@ -12,105 +12,92 @@ except Exception:
 
 
 def parse_args():
-    load_dotenv()  # Load environment variables from .env file
-    LUDUS_API_URL = os.getenv("LUDUS_API_URL", "http://localhost:8080/api")
-    LUDUS_API_KEY = os.getenv("LUDUS_API_KEY", "")
+    load_dotenv()
+
+    ludus_api_url = os.getenv("LUDUS_API_URL", "http://localhost:8080/api/v2")
+    ludus_api_key = os.getenv("LUDUS_API_KEY", "")
+    default_tag = os.getenv("TAG", "ludus4ctf")
 
     parser = argparse.ArgumentParser(
-        description="Ludus Groups/Users/WireGuard Config Manager"
-    )
-
-    subparsers = parser.add_subparsers(
-        dest="command",
-        required=True,
-        help="Available commands",
+        description="ludus4ctf - Simple bulk wrapper for Ludus"
     )
 
     masked_token = (
-        "****" + LUDUS_API_KEY[-4:]
-        if isinstance(LUDUS_API_KEY, str) and len(LUDUS_API_KEY) >= 4
+        "****" + ludus_api_key[-4:]
+        if isinstance(ludus_api_key, str) and len(ludus_api_key) >= 4
         else "Not set"
     )
 
-    def add_common_args(subparser):
-        subparser.add_argument(
-            "--ludus-url",
-            default=LUDUS_API_URL,
-            help=f"URL of the Ludus API. Default: {LUDUS_API_URL or 'Not set'}",
-        )
-        subparser.add_argument(
-            "--ludus-token",
-            default=LUDUS_API_KEY,
-            help=f"API token for Ludus access. Default from ludus.conf: {masked_token}",
-        )
-        subparser.add_argument(
-            "--verbose",
-            "-v",
-            action="store_true",
-            help="Enable verbose output",
-        )
-        subparser.add_argument(
-            "--insecure",
-            action="store_true",
-            help="Disable SSL certificate verification",
-        )
-
-    # subcommand: list
-    list_parser = subparsers.add_parser(
-        "list",
-        help="List all users and their WireGuard configs",
-    )
-    add_common_args(list_parser)
-    list_parser.add_argument(
-        "--groups",
-        "-g",
-        action="store_true",
-        help="Filter users by group name (matches description in Ludus)",
-    )
-    list_parser.add_argument(
-        "--users",
-        "-u",
-        action="store_true",
-        help="Filter users by username (matches description in Ludus)",
+    # Command (add / delete / list)
+    parser.add_argument(
+        "command",
+        choices=["add", "delete", "list", "generate"],
+        help="Action to perform",
     )
 
-    # subcommand: add
-    add_parser = subparsers.add_parser(
-        "add",
-        help="add accounts and generate WireGuard configs",
+    # CSV only for add
+    parser.add_argument(
+        "--csv",
+        "-c",
+        help="Path to CSV file (required for 'add')",
     )
-    add_common_args(add_parser)
-    add_parser.add_argument(
-        "--input",
-        "-i",
-        required=True,
-        help="Path to the input CSV file containing account details",
-    )
-    add_parser.add_argument(
+
+    # generate output directory for WireGuard configs
+    parser.add_argument(
         "--output",
         "-o",
         default="./output",
-        help="Directory to save the generated WireGuard config files",
+        help="Output directory for generated WireGuard configs (default: ./output)",
     )
-    add_parser.add_argument(
+    parser.add_argument(
         "--public-ip",
-        "-p",
-        type=str,
-        help="Overwrite config peer IP",
+        help="Public IP address to include in WireGuard configs (optional)",
     )
-    add_parser.add_argument(
-        "--force",
-        "-f",
+
+    # Common options
+    parser.add_argument(
+        "--ludus-url",
+        default=ludus_api_url,
+        help=f"URL of the Ludus API. Default: {ludus_api_url}",
+    )
+
+    parser.add_argument(
+        "--ludus-token",
+        default=ludus_api_key,
+        help=f"API token for Ludus access. Default: {masked_token}",
+    )
+
+    parser.add_argument(
+        "--tag",
+        default=default_tag,
+        help=f"Tag used to identify managed resources. Default: {default_tag}",
+    )
+
+    parser.add_argument(
+        "--verbose",
+        "-v",
         action="store_true",
-        help="Force creation of groups and users even if they already exist in Ludus (use with caution)",
+        help="Enable verbose output",
     )
 
-    if argcomplete is not None:
-        argcomplete.autocomplete(parser, always_complete_options=True)
+    # Autocomplete CSV
+    if argcomplete is not None and FilesCompleter is not None:
+        try:
+            parser._actions[1].completer = FilesCompleter()
+        except Exception:
+            pass
+        argcomplete.autocomplete(parser)
 
-    # If no arguments are provided, print help and exit
-    if len(sys.argv) == 1:
-        parser.print_help(sys.stderr)
-        sys.exit(1)
+    args = parser.parse_args()
 
-    return parser.parse_args()
+    # Validation logique simple
+    if args.command == "add" and not args.csv:
+        parser.error("the 'add' command requires --csv")
+
+    if args.command != "add" and args.csv:
+        parser.error("--csv can only be used with 'add'")
+
+    if args.command != "generate" and args.public_ip:
+        parser.error("--public-ip can only be used with 'generate'")
+        
+    return args

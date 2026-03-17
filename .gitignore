@@ -4,3 +4,4 @@ ludus.conf
 .env
 env/
 venv/
+config.yml
