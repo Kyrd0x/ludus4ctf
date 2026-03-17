@@ -4,11 +4,9 @@
 
 from core import Ludus, Logger, parse_args
 
-import json
 import csv
 import sys
 import os
-import re
 
 
 def check_csv(file_path):

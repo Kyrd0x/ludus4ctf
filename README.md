@@ -2,7 +2,7 @@
 
 ## What is it
 
-Take a user file, formatted to : 
+Take a user file, formatted like : 
 
 ```csv
 Teamame;Username
@@ -13,7 +13,7 @@ Team2;Tutu
 
 Create the associated ludus groups and users :
 - 1 Range per team
-- 1 user per user
+- 1 user per player
 
 Gather the user wireguard config, option to edit the endpoint IP to a custom one/
 
