@@ -2,4 +2,4 @@ url: https://198.51.100.1:8080
 json: true
 verify: false
 proxy: 
-user: "IgnoreMe, Set LUDUS_API_KEY environment variable to your Ludus"
+user: "IgnoreMe, Set LUDUS_API_KEY in .env"
